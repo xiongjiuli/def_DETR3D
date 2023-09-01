@@ -1,0 +1,34 @@
+# Datasets
+*.nii.gz
+*.pkl
+*.npz
+*.npy
+*.json
+
+# IDE
+.vscode/
+
+# PyCache
+__pycache__/
+*.pyc
+
+# Setup
+*egg-info
+
+# Logging
+*.log
+*.out
+
+# Runs
+runs
+
+# Testing / debugging files
+backup
+
+# Build
+transoar/models/ops/build/
+transoar/models/ops/dist/
+
+# C
+*.so
+*.o
