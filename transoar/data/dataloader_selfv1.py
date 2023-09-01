@@ -3,8 +3,8 @@
 import torch
 from torch.utils.data import DataLoader
 
-from transoar.data.dataset import TransoarDataset
-from transoar.utils.bboxes import segmentation2bbox
+from transoar.data.dataset_selfv1 import TransoarDataset
+from transoar.utils.bboxes import segmentation2bbox, xyzwhdbbox
 
 
 def get_loader(config, split, batch_size=None):
@@ -22,21 +22,6 @@ def get_loader(config, split, batch_size=None):
     )
     return dataloader
 
-# def init_fn(worker_id):
-#     """
-#     https://github.com/pytorch/pytorch/issues/7068
-#     https://tanelp.github.io/posts/a-bug-that-plagues-thousands-of-open-source-ml-projects/
-#     """
-#     torch_seed = torch.initial_seed()
-#     if torch_seed >= 2**30:
-#         torch_seed = torch_seed % 2**30
-#     seed = torch_seed + worker_id
-
-#     random.seed(seed)   
-#     np.random.seed(seed)
-#     monai.utils.set_determinism(seed=seed)
-#     torch.manual_seed(seed)
-
 
 class TransoarCollator:
     def __init__(self, config):
@@ -46,15 +31,24 @@ class TransoarCollator:
         batch_images = []
         batch_labels = []
         batch_masks = []
-        for image, label in batch:
+        batch_xyz = []
+        batch_whd = []
+        for dct in batch:
+            image = dct['input'] 
+            croped_xyz = dct['new_coords'] 
+            name = dct['name'] 
+            croped_whd = dct['origin_whd'] 
             batch_images.append(image)
-            batch_labels.append(label)
+            # batch_labels.append(label)
             batch_masks.append(torch.zeros_like(image))
+            batch_xyz.append(croped_xyz)
+            batch_whd.append(croped_whd)
 
         # Generate bboxes and corresponding class labels
-        batch_bboxes, batch_classes = segmentation2bbox(torch.stack(batch_labels), self._bbox_padding)
+        # batch_bboxes, batch_classes = segmentation2bbox(torch.stack(batch_labels), self._bbox_padding)  # * 从这里看出 0 是背景类
+        batch_bboxes, batch_classes = xyzwhdbbox(batch_xyz, batch_whd)
         # 这个是从seg图中分离出bbox，形式是cxcyczwhd， 形式就是[[], [], []],但是里面是tensor
-        return torch.stack(batch_images), torch.stack(batch_masks), list(zip(batch_bboxes, batch_classes)), torch.stack(batch_labels)
+        return torch.stack(batch_images), torch.stack(batch_masks), list(zip(batch_bboxes, batch_classes)) # , torch.stack(batch_labels)
         # image, mask是全0的数值， labels就是seg图，然后 [(bbox1, class1), (bbox2, class2), ...]
         #* 这个才是最后传出来的东西，分为四个部分
 

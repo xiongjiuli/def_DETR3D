@@ -18,7 +18,7 @@ class TransoarDataset(Dataset):
         data_dir = Path("./dataset/").resolve()
         self._path_to_split = data_dir / self._config['dataset'] / split
         self._data = [data_path.name for data_path in self._path_to_split.iterdir()]
-
+        # 获取路径的最后一个部分，即文件名或文件夹名。
         self._augmentation = get_transforms(split, config)
 
     def __len__(self):
@@ -31,6 +31,7 @@ class TransoarDataset(Dataset):
         case = self._data[idx]
         path_to_case = self._path_to_split / case
         data_path, label_path = sorted(list(path_to_case.iterdir()), key=lambda x: len(str(x)))
+        # 就是这个文件夹下面有两个文件，一个是image文件一个是label文件，label文件的name长度长一些
 
         # Load npy files
         data, label = np.load(data_path), np.load(label_path)
@@ -38,7 +39,7 @@ class TransoarDataset(Dataset):
         if self._config['augmentation']['use_augmentation']:
             data_dict = {
                 'image': data,
-                'label': label
+                'label': label,
             }
 
             # Apply data augmentation

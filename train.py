@@ -10,7 +10,7 @@ import torch
 import monai
 
 from transoar.trainer import Trainer
-from transoar.data.dataloader import get_loader
+from transoar.data.dataloader_selfv1 import get_loader
 from transoar.utils.io import get_config, write_json, get_meta_data
 from transoar.models.transoarnet import TransoarNet
 from transoar.models.build import build_criterion

@@ -3,6 +3,32 @@
 import torch
 import numpy as np
 
+
+def xyzwhdbbox(batch_xyz, batch_whd):
+
+    batch_bboxes = []
+    batch_classes = []
+
+    valid_bboxes = []
+    valid_classes = []
+    if len(batch_xyz) == 0:
+        print('the batch xyz = [], and shouldn"t be []')
+    elif len(batch_xyz) >= 1:
+        # * len(batch_xyz)是batch的数量
+        for i in range(len(batch_whd)):
+            # * 这个下面的才是一个image上所有的坐标
+            for j in range(len(batch_whd[i])):
+                cx, cy, cz = map(float, batch_xyz[i][j])
+                width, height, depth = map(float, batch_whd[i][j])
+                valid_bboxes.append(torch.tensor([cx, cy, cz, width, height, depth]))
+                valid_classes.append(torch.tensor(int(1)))
+                
+    batch_classes.append(torch.tensor(valid_classes))
+    batch_bboxes.append(torch.tensor(valid_bboxes))
+
+    return batch_bboxes, batch_classes
+
+
 def generalized_bbox_iou_3d(bboxes1, bboxes2):
     """
     Generalized IoU from https://giou.stanford.edu/
